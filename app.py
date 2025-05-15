@@ -266,38 +266,32 @@ class CartoonApp(ctk.CTk):
 
 
     def generate_cartoon(self):
+        self.outer_result_frame = ctk.CTkFrame(self.scrollable_body, width=780, height=550, border_color="white", border_width=0)
+        self.outer_result_frame.pack(padx=10, pady=(40, 0))
+        
+        # Prevent frame from shrinking to fit contents
+        self.outer_result_frame.pack_propagate(False)
+        self.result_title = ctk.CTkLabel(self.outer_result_frame, text="Your Cartoon", font=("Arial", 20, "bold"))
+        self.result_title.pack(pady=(20, 10))
+        
         if not hasattr(self, "generated_cartoon_image") or self.generated_cartoon_image is None:
             print("Please upload an image and select a style first.")
             return
-
-        # Clear old result_frame if it exists
-        if hasattr(self, "result_frame") and self.result_frame.winfo_exists():
-            self.result_frame.destroy()
-
-        # Create result_frame similar to demo_frame
-        self.result_frame = ctk.CTkFrame(self.scrollable_body, fg_color="#2A2A2A", width=720)
-        self.result_frame.pack(pady=(30, 10))
-
-        # Use an inner frame to center content
-        inner_frame = ctk.CTkFrame(self.result_frame, fg_color="transparent")
-        inner_frame.pack(anchor="center")
-
-        # Title
-        result_title = ctk.CTkLabel(inner_frame, text="Your Cartoon", font=("Arial", 26, "bold"))
-        result_title.pack(pady=(0, 20))
-
-        # Prepare and show cartoon image
+        
+        # Clear old outer_result_frame if it exists
+        if hasattr(self, "result_frame") and self.outer_result_frame.winfo_exists():
+            self.outer_result_frame.destroy()
+            
+         # Prepare and show cartoon image
         cartoon = self.generated_cartoon_image.copy()
         cartoon.thumbnail((600, 600))
         cartoon_tk = ImageTk.PhotoImage(cartoon)
-
-        self.cartoon_result_label = ctk.CTkLabel(inner_frame, image=cartoon_tk, text="")
+        self.cartoon_result_label = ctk.CTkLabel(self.outer_result_frame, image=cartoon_tk, text="")
         self.cartoon_result_label.image = cartoon_tk
         self.cartoon_result_label.pack(pady=10)
-
         # Download button
         download_btn = ctk.CTkButton(
-            inner_frame,
+            self.outer_result_frame,
             text="Download Cartoon Image",
             font=("Arial", 16),
             command=self.download_cartoon

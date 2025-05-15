@@ -98,7 +98,7 @@ class CartoonApp(ctk.CTk):
         self.main_heading_sub_text.pack(anchor="w", pady=(20, 0), padx=(290, 0))
 
         # Image upload demo section
-        self.demo_frame = ctk.CTkFrame(self.scrollable_body, width=720, border_color="white", border_width=1)
+        self.demo_frame = ctk.CTkFrame(self.scrollable_body, width=720, border_color="white", border_width=0)
         self.demo_frame.pack(padx=10, pady=(40, 0))
 
         self.demo_label = ctk.CTkLabel(self.demo_frame, text="Upload Image", font=("Arial", 20, "bold"))
@@ -198,13 +198,7 @@ class CartoonApp(ctk.CTk):
             cartoon_rgb = cv2.cvtColor(cartoon, cv2.COLOR_BGR2RGB)
             cartoon_pil = Image.fromarray(cartoon_rgb)
 
-            # Display the result
-            cartoon_tk = ImageTk.PhotoImage(cartoon_pil)
-            self.uploaded_image = cartoon_tk
-            self.original_pil_image = cartoon_pil  # Update with processed image
-            self.image_display_label.configure(image=cartoon_tk)
-            self.image_display_label.image = cartoon_tk
-
+            self.generated_cartoon_image = cartoon_pil  # Store result (don't update label yet)
 
         def apply_style_2():
             print("Applied Watercolor Sketch")
@@ -272,40 +266,47 @@ class CartoonApp(ctk.CTk):
 
 
     def generate_cartoon(self):
-        # If no image is uploaded or no style is selected, ignore
-        if not self.uploaded_image or self.selected_style_index is None:
+        if not hasattr(self, "generated_cartoon_image") or self.generated_cartoon_image is None:
             print("Please upload an image and select a style first.")
             return
 
-        # Clear previous result frame if it exists
+        # Clear old result_frame if it exists
         if hasattr(self, "result_frame") and self.result_frame.winfo_exists():
             self.result_frame.destroy()
 
-        # New frame for result
-        self.result_frame = ctk.CTkFrame(self.scrollable_body, fg_color="transparent")
-        self.result_frame.pack(pady=(30, 10), fill="x")
+        # Create result_frame similar to demo_frame
+        self.result_frame = ctk.CTkFrame(self.scrollable_body, fg_color="#2A2A2A", width=720)
+        self.result_frame.pack(pady=(30, 10))
+
+        # Use an inner frame to center content
+        inner_frame = ctk.CTkFrame(self.result_frame, fg_color="transparent")
+        inner_frame.pack(anchor="center")
 
         # Title
-        result_title = ctk.CTkLabel(self.result_frame, text="Your Cartoon", font=("Arial", 26, "bold"))
-        result_title.pack(anchor="w", padx=20, pady=(0, 10))
+        result_title = ctk.CTkLabel(inner_frame, text="Your Cartoon", font=("Arial", 26, "bold"))
+        result_title.pack(pady=(0, 20))
 
-        # Simulated cartoon image (use the uploaded image for now)
-        cartoon_image = self.uploaded_image
-        self.cartoon_result_label = ctk.CTkLabel(self.result_frame, image=cartoon_image, text="")
-        self.cartoon_result_label.image = cartoon_image
+        # Prepare and show cartoon image
+        cartoon = self.generated_cartoon_image.copy()
+        cartoon.thumbnail((600, 600))
+        cartoon_tk = ImageTk.PhotoImage(cartoon)
+
+        self.cartoon_result_label = ctk.CTkLabel(inner_frame, image=cartoon_tk, text="")
+        self.cartoon_result_label.image = cartoon_tk
         self.cartoon_result_label.pack(pady=10)
 
         # Download button
         download_btn = ctk.CTkButton(
-            self.result_frame,
+            inner_frame,
             text="Download Cartoon Image",
             font=("Arial", 16),
             command=self.download_cartoon
         )
         download_btn.pack(pady=(10, 20))
 
+
     def download_cartoon(self):
-        if not hasattr(self, "original_pil_image") or self.original_pil_image is None:
+        if not hasattr(self, "generated_cartoon_image") or self.generated_cartoon_image is None:
             print("No image to save.")
             return
 
@@ -316,7 +317,7 @@ class CartoonApp(ctk.CTk):
         )
         if filepath:
             try:
-                self.original_pil_image.save(filepath)
+                self.generated_cartoon_image.save(filepath)
                 print(f"Cartoon image saved to: {filepath}")
             except Exception as e:
                 print(f"Failed to save image: {e}")
@@ -372,6 +373,7 @@ class CartoonApp(ctk.CTk):
         self.image_display_label.configure(image=photo, text="")
         self.uploaded_image = photo
         self.original_pil_image = image  # Store for saving later
+        self.generated_cartoon_image = None
 
     # Apply rounded corners to the window (Windows-specific)
     def set_rounded_corners(self, radius):

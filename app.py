@@ -238,16 +238,16 @@ class CartoonApp(ctk.CTk):
 
                 photo = ImageTk.PhotoImage(img)
 
-                container = tk.Frame(self.style_row_frame, bg=bg_color)
+                container = tk.Frame(self.style_row_frame, bg="#2A2A2A")
                 container.grid(row=0, column=i, padx=8, pady=5)
                 container.bind("<Button-1>", lambda e, idx=i: self.style_selected(idx))
 
-                label = tk.Label(container, image=photo, bg=bg_color, cursor="hand2")
+                label = tk.Label(container, image=photo, bg="#2A2A2A", cursor="hand2")
                 label.image = photo
                 label.pack()
                 label.bind("<Button-1>", lambda e, idx=i: self.style_selected(idx))
 
-                text_label = tk.Label(container, text=label_text, bg=bg_color,
+                text_label = tk.Label(container, text=label_text, bg="#2A2A2A",
                                       fg=fg_text_color, font=("Arial", 10, "bold"))
                 text_label.pack(pady=4)
                 text_label.bind("<Button-1>", lambda e, idx=i: self.style_selected(idx))
@@ -332,7 +332,7 @@ class CartoonApp(ctk.CTk):
             prev_image_label.configure(highlightthickness=0)
 
         container, image_label, _ = self.style_image_labels[index]
-        image_label.configure(highlightthickness=3, highlightbackground="#3b82f6", bd=1)
+        image_label.configure(highlightthickness=1, highlightbackground="#3b82f6", bd=1)
         self.selected_style_index = index
         print(f"Selected Style {index + 1}")
 
